@@ -80,7 +80,7 @@ const InvitationLoader: React.FC = () => {
     
     const imageUrls = formData.imageUrls;
     const selectedMessageSet = messageSets.find(set => set.id === formData.messageSetId);
-    
+
     const messages = selectedMessageSet ? selectedMessageSet.messages[imageUrls.length] : [];
     if (!messages) return [];
 

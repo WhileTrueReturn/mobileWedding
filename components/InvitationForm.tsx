@@ -83,6 +83,7 @@ const InvitationForm: React.FC = () => {
   const createStories = useMemo((): (Story | { type: 'finalPage'; id: number; })[] => {
     if (!formData.groomName || images.length < 6 || images.length > 10) return [];
     
+    // 미리보기용이므로, File 객체로 임시 URL을 생성합니다.
     const imageUrls = images.map(file => URL.createObjectURL(file));
     const selectedMessageSet = messageSets.find(set => set.id === formData.messageSetId);
     
