@@ -7,10 +7,14 @@ export interface Story {
   duration?: number;
 }
 
+// ★★★★★ 변경점: MessageSet의 구조를 완전히 변경합니다. ★★★★★
 export interface MessageSet {
   id: string;
   name: string;
-  messages: string[];
+  // messages가 이제 사진 개수(6~10)를 key로 갖는 객체가 됩니다.
+  messages: {
+    [key: number]: string[];
+  };
 }
 
 export interface AccountInfo {
@@ -49,6 +53,5 @@ export interface InvitationData {
   transportationInfos: TransportationInfo[];
   messageSetId: string;
   accounts: AccountInfo[];
-  // ★★★★★ 변경점: 사진의 웹 주소 배열을 저장할 필드 추가 ★★★★★
   imageUrls: string[];
 }

@@ -6,7 +6,6 @@ import type { InvitationData, Story } from '../types';
 import StoryViewer from './StoryViewer';
 import { messageSets } from '../data/messages';
 
-// 날짜 포맷 함수 (변경 없음)
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -17,21 +16,17 @@ const formatDate = (dateString: string) => {
   return `${year}년 ${month}월 ${day}일 ${week}요일`;
 };
 
-// ★★★★★ 변경점 1: 이미지 프리로딩을 위한 함수 추가 ★★★★★
 const preloadImages = (urls: string[]): Promise<any> => {
   const promises = urls.map(url => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
       img.src = url;
-      // 이미지가 성공적으로 로드되면 Promise를 성공으로 처리
       img.onload = resolve;
-      // 이미지 로드에 실패해도 전체가 멈추지 않도록 일단 성공으로 처리
       img.onerror = resolve; 
     });
   });
   return Promise.all(promises);
 };
-
 
 const InvitationLoader: React.FC = () => {
   const { invitationId } = useParams<{ invitationId: string }>();
@@ -40,7 +35,6 @@ const InvitationLoader: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<InvitationData | null>(null);
-  // ★★★★★ 변경점 2: 사진 로딩 상태를 관리할 state 추가 ★★★★★
   const [isPreloading, setIsPreloading] = useState(true);
 
   useEffect(() => {
@@ -52,20 +46,18 @@ const InvitationLoader: React.FC = () => {
 
     const fetchAndPreload = async () => {
       try {
-        // 1. Firestore에서 텍스트 정보 먼저 가져오기
         const docRef = doc(db, "invitations", invitationId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const data = docSnap.data() as InvitationData;
           setFormData(data);
-          setLoading(false); // 텍스트 로딩은 완료
+          setLoading(false);
 
-          // 2. 텍스트 정보에 포함된 이미지 URL들을 미리 로딩하기
           if (data.imageUrls && data.imageUrls.length > 0) {
             await preloadImages(data.imageUrls);
           }
-          setIsPreloading(false); // 사진 프리로딩 완료
+          setIsPreloading(false);
           
         } else {
           setError("해당 청첩장을 찾을 수 없습니다.");
@@ -84,11 +76,14 @@ const InvitationLoader: React.FC = () => {
   }, [invitationId]);
   
   const createStories = useMemo((): (Story | { type: 'finalPage'; id: number; })[] => {
-    if (!formData || !formData.imageUrls || formData.imageUrls.length === 0) return [];
+    if (!formData || !formData.imageUrls || formData.imageUrls.length < 6 || formData.imageUrls.length > 10) return [];
     
     const imageUrls = formData.imageUrls;
     const selectedMessageSet = messageSets.find(set => set.id === formData.messageSetId);
-    const messages = selectedMessageSet ? selectedMessageSet.messages : [];
+    
+    const messages = selectedMessageSet ? selectedMessageSet.messages[imageUrls.length] : [];
+    if (!messages) return [];
+
     const stories: Story[] = [];
     const getParentsLine = (father: string, mother: string) => [father, mother].filter(Boolean).join(' · ');
     const groomParents = getParentsLine(formData.groomFatherName, formData.groomMotherName);
@@ -118,10 +113,11 @@ const InvitationLoader: React.FC = () => {
     });
   
     messages.forEach((msg, index) => {
+      const imageIndex = index + 1;
       stories.push({
         id: index + 2,
-        imageUrl: imageUrls[(index + 1) % imageUrls.length],
-        content: <p className="text-2xl">{msg}</p>,
+        imageUrl: imageUrls[imageIndex],
+        content: <p className="text-2xl whitespace-pre-line">{msg}</p>,
       });
     });
   
@@ -134,7 +130,6 @@ const InvitationLoader: React.FC = () => {
     navigate('/');
   }, [navigate]);
 
-  // ★★★★★ 변경점 3: 로딩 UI를 단계별로 분리 ★★★★★
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen font-serif text-lg">청첩장 정보를 불러오는 중...</div>;
   }

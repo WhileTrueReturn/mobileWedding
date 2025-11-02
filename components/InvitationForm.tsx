@@ -26,7 +26,6 @@ const formatDate = (dateString: string) => {
 };
 
 const InvitationForm: React.FC = () => {
-  // App.tsx에 있던 모든 state들을 InvitationForm 내부로 가져옵니다.
   const [formData, setFormData] = useState<InvitationData>({
     groomName: '', brideName: '',
     groomEnglishLastName: '', groomEnglishFirstName: '',
@@ -47,7 +46,6 @@ const InvitationForm: React.FC = () => {
   const [viewerVisible, setViewerVisible] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // UI 관련 state 및 ref
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const draggedItem = useRef<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,11 +81,14 @@ const InvitationForm: React.FC = () => {
   }, [images]);
 
   const createStories = useMemo((): (Story | { type: 'finalPage'; id: number; })[] => {
-    if (!formData.groomName || images.length === 0) return [];
+    if (!formData.groomName || images.length < 6 || images.length > 10) return [];
     
     const imageUrls = images.map(file => URL.createObjectURL(file));
     const selectedMessageSet = messageSets.find(set => set.id === formData.messageSetId);
-    const messages = selectedMessageSet ? selectedMessageSet.messages : [];
+    
+    const messages = selectedMessageSet ? selectedMessageSet.messages[images.length] : [];
+    if (!messages) return [];
+
     const stories: Story[] = [];
     const getParentsLine = (father: string, mother: string) => [father, mother].filter(Boolean).join(' · ');
     const groomParents = getParentsLine(formData.groomFatherName, formData.groomMotherName);
@@ -117,10 +118,11 @@ const InvitationForm: React.FC = () => {
     });
   
     messages.forEach((msg, index) => {
+      const imageIndex = index + 1;
       stories.push({
         id: index + 2,
-        imageUrl: imageUrls[(index + 1) % imageUrls.length],
-        content: <p className="text-2xl">{msg}</p>,
+        imageUrl: imageUrls[imageIndex],
+        content: <p className="text-2xl whitespace-pre-line">{msg}</p>,
       });
     });
   
@@ -130,8 +132,8 @@ const InvitationForm: React.FC = () => {
   }, [formData, images]);
   
   const handleCreateUrl = async () => {
-    if (images.length === 0) {
-      alert('사진을 1장 이상 선택해주세요.');
+    if (images.length < 6 || images.length > 10) {
+      alert(`사진은 최소 6장, 최대 10장까지 선택해야 합니다.\n(현재 ${images.length}장 선택됨)`);
       return;
     }
     const { groomEnglishFirstName, brideEnglishFirstName } = formData;
@@ -186,8 +188,8 @@ const InvitationForm: React.FC = () => {
   };
   
   const handlePreview = () => {
-    if (images.length === 0) {
-      alert('사진을 1장 이상 선택해주세요.');
+    if (images.length < 6 || images.length > 10) {
+      alert(`사진은 최소 6장, 최대 10장까지 선택해야 합니다.\n(현재 ${images.length}장 선택됨)`);
       return;
     }
     setHasPreviewed(true);
@@ -244,25 +246,25 @@ const InvitationForm: React.FC = () => {
     setFormData(prev => ({ ...prev, transportationInfos: prev.transportationInfos.filter(info => info.id !== id) }));
   };
   
-  // ★★★★★ 변경점: handleImageChange 함수에 파일 크기 검사 로직 추가 ★★★★★
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
-    const limit = 5 * 1024 * 1024; // 5MB 용량 제한
+    const limit = 5 * 1024 * 1024;
 
-    // 선택된 모든 파일의 크기를 검사합니다.
+    if (files.length < 6 || files.length > 10) {
+      alert(`사진은 최소 6장, 최대 10장까지 선택할 수 있습니다.\n(현재 ${files.length}장 선택됨)`);
+      e.target.value = '';
+      return;
+    }
+
     for (const file of files) {
       if (file.size > limit) {
-        // 용량을 초과하는 파일이 있으면 사용자에게 알리고 함수를 즉시 종료합니다.
         alert(`'${file.name}' 파일의 용량이 너무 큽니다. (최대 5MB)`);
-        // input의 값을 초기화하여 사용자가 같은 파일을 다시 선택할 수 없도록 합니다.
         e.target.value = ''; 
         return;
       }
     }
-
-    // 모든 파일이 용량 제한을 통과하면, 상태를 업데이트합니다.
     setImages(files);
   };
   
@@ -393,7 +395,7 @@ const InvitationForm: React.FC = () => {
             <fieldset className="border p-4 rounded-lg">
                 <legend className="font-semibold px-2 text-gray-700">사진 선택</legend>
                 <input type="file" multiple accept="image/*" onChange={handleImageChange} className="w-full p-2 border rounded text-sm" />
-                <p className="text-xs text-gray-500 mt-2">사진을 드래그해서 순서를 바꿀 수 있습니다. (각 5MB 이하)</p>
+                <p className="text-xs text-gray-500 mt-2">최소 6장, 최대 10장까지 선택 가능합니다. (각 5MB 이하)</p>
                  <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                     {imagePreviews.map((src, index) => (
                         <div
