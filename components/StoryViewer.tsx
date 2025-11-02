@@ -47,11 +47,13 @@ interface StoryViewerProps {
   stories: (Story | { type: 'finalPage'; id: number; })[];
   invitationData: InvitationData;
   onClose: () => void;
+  // ★★★★★ 변경점 1: '다시보기'를 처리할 onRestart 함수를 props로 받습니다. ★★★★★
+  onRestart: () => void;
 }
 
 const DURATION = 3000;
 
-const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onClose }) => {
+const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onClose, onRestart }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -102,20 +104,12 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [currentIndex, stories, isPaused, navigationDirection, handleNext]);
-
-  const restartStory = () => {
-    setCurrentIndex(0);
-  };
   
   const handleInteractionStart = () => setIsPaused(true);
   const handleInteractionEnd = () => setIsPaused(false);
 
   const currentStoryOrPage = stories[currentIndex];
   if (!currentStoryOrPage) return null;
-
-  // ★★★★★ 변경점 1: 이전/다음 스토리 정보를 미리 계산합니다. ★★★★★
-  const prevStory = currentIndex > 0 ? stories[currentIndex - 1] : null;
-  const nextStory = currentIndex < stories.length - 1 ? stories[currentIndex + 1] : null;
 
   if ('type' in currentStoryOrPage && currentStoryOrPage.type === 'finalPage') {
     const { weddingLat, weddingLng, weddingLocation, transportationInfos, accounts } = invitationData;
@@ -178,8 +172,19 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
             </div>
           </div>
           <div className="mt-auto pt-8 space-y-2">
-            <button onClick={restartStory} className="w-full bg-pink-500 text-white p-3 rounded-lg font-bold hover:bg-pink-600 transition-colors">청첩장 다시보기</button>
-            <button onClick={onClose} className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-400 transition-colors">닫기</button>
+            {/* ★★★★★ 변경점 2: onClick에 부모로부터 받은 onRestart 함수를 연결합니다. ★★★★★ */}
+            <button 
+              onClick={onRestart}
+              className="w-full bg-pink-500 text-white p-3 rounded-lg font-bold hover:bg-pink-600 transition-colors"
+            >
+              청첩장 다시보기
+            </button>
+            <button 
+              onClick={onClose} 
+              className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-400 transition-colors"
+            >
+              닫기
+            </button>
           </div>
         </div>
       </div>
@@ -196,10 +201,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
         onTouchStart={handleInteractionStart}
         onTouchEnd={handleInteractionEnd}
       >
-        {/* ★★★★★ 변경점 2: 보이지 않는 곳에 이전/다음 이미지를 미리 렌더링합니다. ★★★★★ */}
         <div style={{ display: 'none' }}>
-          {prevStory && 'imageUrl' in prevStory && <img src={prevStory.imageUrl} alt="Preload previous" />}
-          {nextStory && 'imageUrl' in nextStory && <img src={nextStory.imageUrl} alt="Preload next" />}
+          {stories.map(story => {
+            if ('imageUrl' in story) {
+              return <img key={`preload-${story.id}`} src={story.imageUrl} alt={`Preload story ${story.id}`} />;
+            }
+            return null;
+          })}
         </div>
 
         <img src={currentStoryOrPage.imageUrl} alt="Story background" className="absolute w-full h-full object-cover" />

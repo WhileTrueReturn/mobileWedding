@@ -37,6 +37,9 @@ const InvitationLoader: React.FC = () => {
   const [formData, setFormData] = useState<InvitationData | null>(null);
   const [isPreloading, setIsPreloading] = useState(true);
 
+  // ★★★★★ 변경점 1: StoryViewer를 다시 렌더링하기 위한 'key' state 추가 ★★★★★
+  const [viewerKey, setViewerKey] = useState(0);
+
   useEffect(() => {
     if (!invitationId) {
       setError("잘못된 접근입니다.");
@@ -130,6 +133,12 @@ const InvitationLoader: React.FC = () => {
     navigate('/');
   }, [navigate]);
 
+  // ★★★★★ 변경점 2: '다시보기'를 처리하는 새로운 함수 추가 ★★★★★
+  const handleRestart = useCallback(() => {
+    // viewerKey 값을 1 증가시켜 React에게 StoryViewer를 완전히 새로운 컴포넌트로 인식하게 만듭니다.
+    setViewerKey(prevKey => prevKey + 1);
+  }, []);
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen font-serif text-lg">청첩장 정보를 불러오는 중...</div>;
   }
@@ -149,9 +158,12 @@ const InvitationLoader: React.FC = () => {
 
   return (
     <StoryViewer 
+      // ★★★★★ 변경점 3: key prop을 전달하고, onRestart 함수를 새로 전달 ★★★★★
+      key={viewerKey}
       stories={stories}
       invitationData={formData!}
       onClose={handleCloseViewer}
+      onRestart={handleRestart} // '다시보기' 버튼이 이 함수를 호출하도록 전달
     />
   );
 };
