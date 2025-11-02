@@ -43,11 +43,12 @@ export interface InvitationData {
   weddingTime: string;
   weddingLocation: string;
   weddingHall: string;
-  // 장소의 전체 주소를 저장할 필드를 추가합니다.
   weddingAddress: string;
   weddingLat: number | null;
   weddingLng: number | null;
   transportationInfos: TransportationInfo[];
   messageSetId: string;
   accounts: AccountInfo[];
+  // ★★★★★ 변경점: 사진의 웹 주소 배열을 저장할 필드 추가 ★★★★★
+  imageUrls: string[];
 }

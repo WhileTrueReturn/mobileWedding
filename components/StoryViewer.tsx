@@ -113,6 +113,10 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
   const currentStoryOrPage = stories[currentIndex];
   if (!currentStoryOrPage) return null;
 
+  // ★★★★★ 변경점 1: 이전/다음 스토리 정보를 미리 계산합니다. ★★★★★
+  const prevStory = currentIndex > 0 ? stories[currentIndex - 1] : null;
+  const nextStory = currentIndex < stories.length - 1 ? stories[currentIndex + 1] : null;
+
   if ('type' in currentStoryOrPage && currentStoryOrPage.type === 'finalPage') {
     const { weddingLat, weddingLng, weddingLocation, transportationInfos, accounts } = invitationData;
     const groomAccounts = accounts.filter(a => a.type === 'groom');
@@ -192,6 +196,12 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
         onTouchStart={handleInteractionStart}
         onTouchEnd={handleInteractionEnd}
       >
+        {/* ★★★★★ 변경점 2: 보이지 않는 곳에 이전/다음 이미지를 미리 렌더링합니다. ★★★★★ */}
+        <div style={{ display: 'none' }}>
+          {prevStory && 'imageUrl' in prevStory && <img src={prevStory.imageUrl} alt="Preload previous" />}
+          {nextStory && 'imageUrl' in nextStory && <img src={nextStory.imageUrl} alt="Preload next" />}
+        </div>
+
         <img src={currentStoryOrPage.imageUrl} alt="Story background" className="absolute w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
@@ -203,7 +213,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
           navigationDirection={navigationDirection}
         />
         
-        {/* ★★★★★ 변경점: 이벤트 충돌을 막는 onMouseDown, onTouchStart 추가 ★★★★★ */}
         <div 
           className="absolute top-0 left-0 bottom-0 w-[30%] z-20" 
           onClick={handlePrev}

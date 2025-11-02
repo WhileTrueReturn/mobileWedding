@@ -1,0 +1,8 @@
+# 로컬 환경 파일
+.env.local
+
+# 빌드 결과물
+dist
+
+# 설치된 패키지
+node_modules
