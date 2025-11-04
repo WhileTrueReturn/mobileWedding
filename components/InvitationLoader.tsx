@@ -6,105 +6,54 @@ import type { InvitationData, Story } from '../types';
 import StoryViewer from './StoryViewer';
 import { messageSets } from '../data/messages';
 
-// ★★★★★ 변경점 1: 2단계 애니메이션을 처리하도록 로직 수정 ★★★★★
-const ElegantLoadingScreen: React.FC<{ groomName?: string; brideName?: string; isFinished: boolean; onAnimationEnd: () => void }> = ({ groomName, brideName, isFinished, onAnimationEnd }) => {
-  const [stage, setStage] = useState(0); // 0: 시작 전, 1: Intro, 2: 이름 표시, 3: 페이드아웃
-  const [startAnimation, setStartAnimation] = useState(false);
-
+// 펜 글씨 로딩 애니메이션 컴포넌트
+const ElegantLoadingScreen: React.FC<{ isFinished: boolean; onAnimationEnd: () => void }> = ({ isFinished, onAnimationEnd }) => {
+  const words = ['Wedding', 'Invitation'];
   useEffect(() => {
-    // 컴포넌트가 마운트되자마자 즉시 Intro 애니메이션 시작
-    const startTimer = setTimeout(() => {
-      setStartAnimation(true);
-      setStage(1);
-    }, 100);
-
-    if (isFinished) {
-      // 데이터 로딩이 끝나면, 최소 2.5초를 기다린 후 이름 애니메이션으로 전환
-      const stage2Timer = setTimeout(() => {
-        setStage(2);
-      }, 2500);
-      
-      // 이름 애니메이션 시작 후 3.5초 뒤에 페이드아웃 시작
-      const stage3Timer = setTimeout(() => {
-        setStage(3);
-      }, 6000); // 2500ms + 3500ms
-      
-      // 전체 애니메이션 종료 후 화면 전환
-      const endTimer = setTimeout(onAnimationEnd, 6500);
-
-      return () => {
-        clearTimeout(stage2Timer);
-        clearTimeout(stage3Timer);
-        clearTimeout(endTimer);
-      };
-    }
-    return () => clearTimeout(startTimer);
-  }, [isFinished, onAnimationEnd]);
-
-  const showIntro = startAnimation && stage === 1;
-  const showNames = startAnimation && stage === 2;
+    if (!isFinished) return;
+    // 총 애니메이션 시간 계산 및 화면 전환 트리거
+    const totalLetters = words.join('').length;
+    const totalDuration = totalLetters * 90 + (words.length - 1) * 400 + 600;
+    const t = setTimeout(onAnimationEnd, totalDuration);
+    return () => clearTimeout(t);
+  }, [isFinished, onAnimationEnd, words]);
 
   return (
-    <>
-      <div className={`fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#FCFBF9] via-[#F5F2EE] to-[#EDE8E3] z-50 transition-opacity duration-500 ${stage === 3 ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="text-center font-light text-[#8C7B70] relative w-full h-[250px] flex items-center justify-center">
-
-          {/* 1단계: Wedding Invitation */}
-          <div className={`absolute transition-opacity duration-700 ease-in-out ${showIntro ? 'opacity-100' : 'opacity-0'}`}>
-            <div 
-              className={`transition-all duration-1000 ease-out ${showIntro ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '200ms' }}
-            >
-              <h2 className="text-3xl md:text-4xl tracking-wider" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                Wedding
-              </h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#FCFBF9] via-[#F5F2EE] to-[#EDE8E3] z-50" role="alert" aria-live="polite" aria-label="Wedding invitation loading">
+      <div className="text-center select-none">
+        <div className="overflow-hidden">
+          {words.map((w, wi) => (
+            <div key={w} className="mb-3 last:mb-0">
+              {w.split('').map((ch, ci) => {
+                const indexSoFar = w.split('').slice(0, ci).length + words.slice(0, wi).join('').length;
+                const delay = indexSoFar * 90 + wi * 400;
+                return (
+                  <span
+                    key={ci}
+                    style={{ animationDelay: `${delay}ms` }}
+                    className="inline-block opacity-0 translate-y-3 text-[42px] md:text-[64px] font-light tracking-[0.04em] text-[#5f4631] handwriting-letter"
+                  >
+                    {ch === ' ' ? '\u00A0' : ch}
+                  </span>
+                );
+              })}
             </div>
-            <div 
-              className={`transition-all duration-1000 ease-out mt-3 ${showIntro ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '1000ms' }}
-            >
-              <h2 className="text-3xl md:text-4xl tracking-wider" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                Invitation
-              </h2>
-            </div>
-          </div>
-
-          {/* 2단계: 이름 및 문구 */}
-          <div className={`absolute transition-opacity duration-700 ease-in-out ${showNames ? 'opacity-100' : 'opacity-0'}`}>
-            <div 
-              className={`transition-all duration-1000 ease-out ${showNames ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '200ms' }}
-            >
-              <h2 className="text-3xl md:text-4xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                {groomName}
-              </h2>
-            </div>
-            <div 
-              className={`transition-all duration-1000 ease-out ${showNames ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '800ms' }}
-            >
-              <p className="text-xl my-4 text-[#D3C4B8]">♥</p>
-            </div>
-            <div 
-              className={`transition-all duration-1000 ease-out ${showNames ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '1400ms' }}
-            >
-              <h2 className="text-3xl md:text-4xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                {brideName}
-              </h2>
-            </div>
-            <div 
-              className={`transition-all duration-1000 ease-out mt-8 ${showNames ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: '2000ms' }}
-            >
-              <p className="text-base tracking-[0.2em]" style={{ fontFamily: "'Noto Serif KR', serif" }}>
-                우리 결혼합니다
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
+        <div className="mt-6 text-[13px] tracking-[0.35em] text-[#9c8874] font-medium fade-in-after" style={{ animationDelay: `${words.join('').length * 90 + (words.length - 1) * 400}ms` }}>LOADING…</div>
       </div>
-    </>
+      <style>
+        {`
+        @keyframes handwritingAppear {0%{opacity:0;transform:translateY(12px) scale(1.02);}70%{opacity:.85;}100%{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes subtleFade {0%{opacity:0}100%{opacity:0.95}}
+        .handwriting-letter{font-family:'Cormorant Garamond', 'Times New Roman', serif;animation:handwritingAppear 620ms cubic-bezier(.24,.76,.32,1.05) forwards;}
+        .fade-in-after{opacity:0;animation:subtleFade 900ms ease forwards;font-family:'Cormorant Garamond', serif;}
+        @media (prefers-reduced-motion: reduce){
+          .handwriting-letter, .fade-in-after{animation:none;opacity:1;transform:none;}
+        }
+        `}
+      </style>
+    </div>
   );
 };
 
@@ -230,6 +179,7 @@ const InvitationLoader: React.FC = () => {
     return [...stories, finalPage];
   }, [formData]);
 
+  // ★★★★★ 변경점: handleCloseViewer 함수의 내용을 window.close()로 변경합니다. ★★★★★
   const handleCloseViewer = useCallback(() => {
     window.close();
   }, []);
@@ -260,8 +210,6 @@ const InvitationLoader: React.FC = () => {
   
   return (
     <ElegantLoadingScreen
-      groomName={formData?.groomName}
-      brideName={formData?.brideName}
       isFinished={!loading && !isPreloading}
       onAnimationEnd={() => setShowStoryViewer(true)}
     />
