@@ -13,23 +13,17 @@ declare global {
 const KakaoMap: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
   useEffect(() => {
     if (!lat || !lng || !window.kakao?.maps) return;
-
     const container = document.getElementById('kakao-map-container');
     if (!container) return;
-
     const options = {
       center: new window.kakao.maps.LatLng(lat, lng),
       level: 4,
     };
     const map = new window.kakao.maps.Map(container, options);
-    
     const markerPosition = new window.kakao.maps.LatLng(lat, lng);
     const marker = new window.kakao.maps.Marker({ position: markerPosition });
     marker.setMap(map);
 
-    // ★★★★★ 변경점 (핵심!): 지도를 다시 그려주는 로직 추가 ★★★★★
-    // 컴포넌트가 렌더링된 후 아주 짧은 시간 뒤에 relayout을 호출하여
-    // 지도의 크기를 컨테이너에 맞게 재조정합니다.
     setTimeout(() => {
       map.relayout();
     }, 0);
@@ -72,8 +66,11 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
   const handleNext = useCallback(() => {
     if (currentIndex < stories.length - 1) {
       setNavigationDirection('next');
+    } else {
+      // 마지막 스토리에서 다음으로 넘기려고 하면 onClose를 호출 (선택적 동작)
+      onClose();
     }
-  }, [currentIndex, stories.length]);
+  }, [currentIndex, stories.length, onClose]);
   
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -188,12 +185,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
             >
               청첩장 다시보기
             </button>
-            <button 
-              onClick={onClose} 
-              className="w-full bg-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-400 transition-colors"
-            >
-              닫기
-            </button>
+            {/* ★★★★★ 변경점 1: '닫기' 버튼을 완전히 삭제합니다. ★★★★★ */}
           </div>
         </div>
       </div>
@@ -243,7 +235,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
           onTouchStart={(e) => e.stopPropagation()}
         ></div>
 
-        <button onClick={onClose} className="absolute top-4 right-4 text-white text-2xl z-30">&times;</button>
+        {/* ★★★★★ 변경점 2: 우측 상단의 'X' 버튼을 완전히 삭제합니다. ★★★★★ */}
 
         <div className="absolute inset-0 flex items-end justify-center p-4 pb-20 z-10">
           <div className="bg-black/30 backdrop-blur-sm px-6 py-4 rounded-xl text-white text-center font-serif text-shadow korean-wrap max-w-full">
