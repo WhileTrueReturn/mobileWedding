@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>모바일 청첩장</title>
+  
+  <!-- ★★★★★ 변경점: 동적 OG 태그 자리 표시자 추가 ★★★★★ -->
+  <!-- 이 부분의 __OG_...__ 값들은 서버 함수(api/index.ts)가 자동으로 교체해줍니다. -->
+  <title>__OG_TITLE__</title>
+  <meta name="description" content="__OG_DESCRIPTION__" />
+  <meta property="og:title" content="__OG_TITLE__" />
+  <meta property="og:description" content="__OG_DESCRIPTION__" />
+  <meta property="og:image" content="__OG_IMAGE__" />
+  <meta property="og:url" content="https://www.mobilewedding.kr" />
+  <meta property="og:type" content="website" />
+  <!-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- ★★★★★ 변경점: &libraries=services 추가 ★★★★★ -->
-  <!-- appkey 뒤에 &libraries=services 를 꼭 추가해주세요. -->
+  <!-- 카카오맵 스크립트는 이미 올바르게 추가되어 있습니다. -->
   <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=33852860bab9b63eac097a0fd40e367f&libraries=services"></script>
-  <!-- ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ -->
 
   <style>
     body {

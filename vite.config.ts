@@ -18,6 +18,10 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      // ★★★★★ 변경점: 빌드 결과물 경로를 명확히 지정 ★★★★★
+      build: {
+        outDir: 'dist'
       }
     };
 });
