@@ -6,6 +6,61 @@ import type { InvitationData, Story } from '../types';
 import StoryViewer from './StoryViewer';
 import { messageSets } from '../data/messages';
 
+// 펜 글씨 로딩 애니메이션: 'Wedding' -> 'Invitation' 순서로 손글씨처럼 나타남
+const ElegantLoadingScreen: React.FC<{ isFinished: boolean; onAnimationEnd: () => void }> = ({ isFinished, onAnimationEnd }) => {
+  const words = ['Wedding', 'Invitation'];
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    if (!isFinished) return;
+    setStarted(true);
+    // 총 애니메이션 시간: 글자당 90ms + 각 단어 사이 400ms 여유
+    const totalLetters = words.join('').length;
+    const totalDuration = totalLetters * 90 + (words.length - 1) * 400 + 600; // 마지막 여유 + 페이드아웃 시간
+    const t = setTimeout(onAnimationEnd, totalDuration);
+    return () => clearTimeout(t);
+  }, [isFinished, onAnimationEnd, words]);
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#FCFBF9] via-[#F5F2EE] to-[#EDE8E3] z-50" role="alert" aria-live="polite" aria-label="Wedding invitation loading">
+      <div className="text-center select-none">
+        <div className="overflow-hidden">
+          {words.map((w, wi) => (
+            <div key={w} className="mb-3 last:mb-0">
+              {w.split('').map((ch, ci) => {
+                const indexSoFar = w.split('').slice(0, ci).length + words.slice(0, wi).join('').length;
+                const delay = indexSoFar * 90 + wi * 400; // 단어 사이 지연
+                return (
+                  <span
+                    key={ci}
+                    style={{
+                      animationDelay: `${delay}ms`,
+                    }}
+                    className="inline-block opacity-0 translate-y-3 text-[42px] md:text-[64px] font-light tracking-[0.04em] text-[#5f4631] handwriting-letter"
+                  >
+                    {ch === ' ' ? '\u00A0' : ch}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+  <div className="mt-6 text-[13px] tracking-[0.35em] text-[#9c8874] font-medium fade-in-after" style={{ animationDelay: `${words.join('').length * 90 + (words.length - 1) * 400}ms` }}>LOADING…</div>
+      </div>
+      <style>
+        {`
+        @keyframes handwritingAppear {0%{opacity:0;transform:translateY(12px) scale(1.02);}70%{opacity:.85;}100%{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes subtleFade {0%{opacity:0}100%{opacity:0.95}}
+        .handwriting-letter{font-family:'Cormorant Garamond', 'Times New Roman', serif;animation:handwritingAppear 620ms cubic-bezier(.24,.76,.32,1.05) forwards;}
+        .fade-in-after{opacity:0;animation:subtleFade 900ms ease forwards;font-family:'Cormorant Garamond', serif;}
+        @media (prefers-reduced-motion: reduce){
+          .handwriting-letter, .fade-in-after{animation:none;opacity:1;transform:none;}
+        }
+        `}
+      </style>
+    </div>
+  );
+};
+
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -36,8 +91,7 @@ const InvitationLoader: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<InvitationData | null>(null);
   const [isPreloading, setIsPreloading] = useState(true);
-
-  // ★★★★★ 변경점 1: StoryViewer를 다시 렌더링하기 위한 'key' state 추가 ★★★★★
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [viewerKey, setViewerKey] = useState(0);
 
   useEffect(() => {
@@ -133,37 +187,34 @@ const InvitationLoader: React.FC = () => {
     navigate('/');
   }, [navigate]);
 
-  // ★★★★★ 변경점 2: '다시보기'를 처리하는 새로운 함수 추가 ★★★★★
   const handleRestart = useCallback(() => {
-    // viewerKey 값을 1 증가시켜 React에게 StoryViewer를 완전히 새로운 컴포넌트로 인식하게 만듭니다.
     setViewerKey(prevKey => prevKey + 1);
   }, []);
-
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen font-serif text-lg">청첩장 정보를 불러오는 중...</div>;
-  }
-
+  
   if (error) {
     return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-500">{error}</div>;
   }
+
+  if (showStoryViewer && formData) {
+    const stories = createStories;
+    if (stories.length === 0) {
+      return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-500">청첩장 정보를 표시할 수 없습니다.</div>;
+    }
+    return (
+      <StoryViewer 
+        key={viewerKey}
+        stories={stories}
+        invitationData={formData}
+        onClose={handleCloseViewer}
+        onRestart={handleRestart}
+      />
+    );
+  }
   
-  if (isPreloading) {
-    return <div className="flex items-center justify-center min-h-screen font-serif text-lg">사진을 불러오는 중...</div>;
-  }
-
-  const stories = createStories;
-  if (stories.length === 0) {
-    return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-500">청첩장 정보를 표시할 수 없습니다.</div>;
-  }
-
   return (
-    <StoryViewer 
-      // ★★★★★ 변경점 3: key prop을 전달하고, onRestart 함수를 새로 전달 ★★★★★
-      key={viewerKey}
-      stories={stories}
-      invitationData={formData!}
-      onClose={handleCloseViewer}
-      onRestart={handleRestart} // '다시보기' 버튼이 이 함수를 호출하도록 전달
+    <ElegantLoadingScreen
+      isFinished={!loading && !isPreloading}
+      onAnimationEnd={() => setShowStoryViewer(true)}
     />
   );
 };
