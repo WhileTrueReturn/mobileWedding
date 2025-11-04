@@ -13,16 +13,27 @@ declare global {
 const KakaoMap: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
   useEffect(() => {
     if (!lat || !lng || !window.kakao?.maps) return;
+
     const container = document.getElementById('kakao-map-container');
     if (!container) return;
+
     const options = {
       center: new window.kakao.maps.LatLng(lat, lng),
       level: 4,
     };
     const map = new window.kakao.maps.Map(container, options);
+    
     const markerPosition = new window.kakao.maps.LatLng(lat, lng);
     const marker = new window.kakao.maps.Marker({ position: markerPosition });
     marker.setMap(map);
+
+    // ★★★★★ 변경점 (핵심!): 지도를 다시 그려주는 로직 추가 ★★★★★
+    // 컴포넌트가 렌더링된 후 아주 짧은 시간 뒤에 relayout을 호출하여
+    // 지도의 크기를 컨테이너에 맞게 재조정합니다.
+    setTimeout(() => {
+      map.relayout();
+    }, 0);
+
   }, [lat, lng]);
 
   return <div id="kakao-map-container" className="w-full h-56 rounded-lg border bg-gray-100"></div>;
@@ -47,7 +58,6 @@ interface StoryViewerProps {
   stories: (Story | { type: 'finalPage'; id: number; })[];
   invitationData: InvitationData;
   onClose: () => void;
-  // ★★★★★ 변경점 1: '다시보기'를 처리할 onRestart 함수를 props로 받습니다. ★★★★★
   onRestart: () => void;
 }
 
@@ -172,7 +182,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
             </div>
           </div>
           <div className="mt-auto pt-8 space-y-2">
-            {/* ★★★★★ 변경점 2: onClick에 부모로부터 받은 onRestart 함수를 연결합니다. ★★★★★ */}
             <button 
               onClick={onRestart}
               className="w-full bg-pink-500 text-white p-3 rounded-lg font-bold hover:bg-pink-600 transition-colors"
