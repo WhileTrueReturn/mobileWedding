@@ -56,7 +56,6 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="w-full bg-gray-50 flex flex-col items-center font-serif">
-      {/* ★★★★★ 변경점 1: '샘플 보기'와 '제작 문의'를 포함한 상단 섹션 ★★★★★ */}
       <div className="w-full text-center py-16 md:py-20 px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
           결혼을 축하드립니다
@@ -72,9 +71,7 @@ const LandingPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* ★★★★★ 변경점 2: 상세 이미지 섹션 (마진 제거) ★★★★★ */}
       <div className="w-full max-w-5xl mx-auto px-0">
-        {/* 이미지들을 담는 컨테이너에서 gap(간격)을 제거합니다. */}
         <div className="flex flex-col items-center">
           <img 
             src="/mainPage1.png" 
@@ -94,7 +91,6 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       
-      {/* ★★★★★ 변경점 3: '제작 문의' 섹션을 맨 아래로 이동 ★★★★★ */}
       <div className="w-full flex flex-col items-center text-center py-16 md:py-20 px-4">
         <div className="max-w-2xl w-full">
           <div className="bg-white p-8 rounded-lg shadow-lg border text-left">
@@ -105,12 +101,25 @@ const LandingPage: React.FC = () => {
             <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto">
               {formText.trim()}
             </pre>
-            <button
-              onClick={handleCopy}
-              className="w-full mt-6 bg-pink-500 text-white p-3 rounded-lg font-bold text-lg hover:bg-pink-600 transition-colors"
-            >
-              {copied ? '✅ 복사 완료!' : '양식 복사하기'}
-            </button>
+            {/* ★★★★★ 변경점: 버튼들을 감싸는 div 추가 및 인스타그램 버튼 추가 ★★★★★ */}
+            <div className="mt-6 space-y-3">
+              <button
+                onClick={handleCopy}
+                className="w-full bg-pink-500 text-white p-3 rounded-lg font-bold text-lg hover:bg-pink-600 transition-colors"
+              >
+                {copied ? '✅ 복사 완료!' : '양식 복사하기'}
+              </button>
+              <a
+                href="https://www.instagram.com/develop_live?igsh=MW8wcmV3b203YXFhOA=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full bg-white text-pink-500 border-2 border-pink-500 p-3 rounded-lg font-bold text-lg hover:bg-pink-50 transition-colors"
+              >
+                {/* SVG 아이콘은 그대로 유지 */}
+                인스타그램으로 DM 보내기
+              </a>
+            </div>
+            {/* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */}
           </div>
         </div>
       </div>
