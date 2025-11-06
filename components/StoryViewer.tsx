@@ -11,26 +11,49 @@ declare global {
 
 // 카카오맵을 렌더링하는 독립적인 컴포넌트입니다.
 const KakaoMap: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+
   useEffect(() => {
-    if (!lat || !lng || !window.kakao?.maps) return;
-    const container = document.getElementById('kakao-map-container');
-    if (!container) return;
+    if (!lat || !lng || !window.kakao?.maps || !mapContainerRef.current) return;
+
     const options = {
       center: new window.kakao.maps.LatLng(lat, lng),
       level: 4,
     };
-    const map = new window.kakao.maps.Map(container, options);
+    
+    // mapRef에 생성된 지도 인스턴스를 저장합니다.
+    mapRef.current = new window.kakao.maps.Map(mapContainerRef.current, options);
+    
     const markerPosition = new window.kakao.maps.LatLng(lat, lng);
     const marker = new window.kakao.maps.Marker({ position: markerPosition });
-    marker.setMap(map);
-
-    setTimeout(() => {
-      map.relayout();
-    }, 0);
+    marker.setMap(mapRef.current);
 
   }, [lat, lng]);
 
-  return <div id="kakao-map-container" className="w-full h-56 rounded-lg border bg-gray-100"></div>;
+  // ★★★★★ 변경점 (핵심!): ResizeObserver를 사용하여 크기 변경을 감지 ★★★★★
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container || !mapRef.current) return;
+
+    // ResizeObserver 인스턴스를 생성합니다.
+    const observer = new ResizeObserver(() => {
+      // 컨테이너의 크기가 변경되거나 확정될 때마다 relayout을 호출합니다.
+      if (mapRef.current) {
+        mapRef.current.relayout();
+      }
+    });
+
+    // 컨테이너에 대한 감시를 시작합니다.
+    observer.observe(container);
+
+    // 컴포넌트가 사라질 때 감시를 중단합니다.
+    return () => {
+      observer.disconnect();
+    };
+  }, []); // 이 useEffect는 한 번만 실행됩니다.
+
+  return <div ref={mapContainerRef} id="kakao-map-container" className="w-full h-56 rounded-lg border bg-gray-100"></div>;
 };
 
 const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
@@ -67,7 +90,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
     if (currentIndex < stories.length - 1) {
       setNavigationDirection('next');
     } else {
-      // 마지막 스토리에서 다음으로 넘기려고 하면 onClose를 호출 (선택적 동작)
       onClose();
     }
   }, [currentIndex, stories.length, onClose]);
@@ -185,7 +207,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
             >
               청첩장 다시보기
             </button>
-            {/* ★★★★★ 변경점 1: '닫기' 버튼을 완전히 삭제합니다. ★★★★★ */}
           </div>
         </div>
       </div>
@@ -234,8 +255,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
         ></div>
-
-        {/* ★★★★★ 변경점 2: 우측 상단의 'X' 버튼을 완전히 삭제합니다. ★★★★★ */}
 
         <div className="absolute inset-0 flex items-end justify-center p-4 pb-20 z-10">
           <div className="bg-black/30 backdrop-blur-sm px-6 py-4 rounded-xl text-white text-center font-serif text-shadow korean-wrap max-w-full">
