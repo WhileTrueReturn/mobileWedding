@@ -105,7 +105,7 @@ const LandingPage: React.FC = () => {
             <div className="mt-6 space-y-3">
               <button
                 onClick={handleCopy}
-                className="w-full bg-pink-500 text-white p-3 rounded-lg font-bold text-lg hover:bg-pink-600 transition-colors"
+                className="w-full bg-white text-[#8C7B70] border-2 border-[#8C7B70] p-3 rounded-lg font-bold text-lg hover:bg-[#FBF9F6] transition-colors"
               >
                 {copied ? '✅ 복사 완료!' : '양식 복사하기'}
               </button>
@@ -113,7 +113,7 @@ const LandingPage: React.FC = () => {
                 href="https://www.instagram.com/develop_live?igsh=MW8wcmV3b203YXFhOA=="
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-full bg-white text-pink-500 border-2 border-pink-500 p-3 rounded-lg font-bold text-lg hover:bg-pink-50 transition-colors"
+                className="flex items-center justify-center w-full bg-[#8C7B70] text-white p-3 rounded-lg font-bold text-lg hover:opacity-90 transition-opacity"
               >
                 {/* SVG 아이콘은 그대로 유지 */}
                 인스타그램으로 DM 보내기
