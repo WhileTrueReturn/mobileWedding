@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // 1. react-router-dom의 Link 컴포넌트를 임포트합니다.
+import { Link } from 'react-router-dom';
 
 const LandingPage: React.FC = () => {
   const formText = `
@@ -7,9 +7,9 @@ const LandingPage: React.FC = () => {
 
 **- 기본 정보 -**
 1. 신랑 한글 이름:
-2. 신랑 영문 이름:
+2. 신랑 영문 이름 (First Name):
 3. 신부 한글 이름:
-4. 신부 영문 이름:
+4. 신부 영문 이름 (First Name):
 
 **- 혼주 정보 (선택 사항) -**
 5. 신랑 아버님 성함:
@@ -55,42 +55,63 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center font-serif p-8">
-      <div className="max-w-2xl w-full">
-        
-        {/* ★★★★★ 변경점: '청첩장 미리보기' 링크 버튼 추가 ★★★★★ */}
-        <div className="mb-16">
-          <p className="text-gray-600 mb-3">샘플 청첩장이 궁금하신가요?</p>
-          <Link 
-            to="/gildonggilsoon" 
-            className="inline-block bg-white text-gray-800 font-bold py-3 px-8 rounded-full shadow-md border border-gray-200 hover:bg-gray-100 transition-transform transform hover:scale-105"
-          >
-            💌 청첩장 샘플 보기
-          </Link>
-        </div>
-        {/* ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★ */}
-
+    <div className="w-full bg-gray-50 flex flex-col items-center font-serif">
+      {/* ★★★★★ 변경점 1: '샘플 보기'와 '제작 문의'를 포함한 상단 섹션 ★★★★★ */}
+      <div className="w-full text-center py-16 md:py-20 px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
           결혼을 축하드립니다
         </h1>
-        <p className="text-lg text-gray-600 mb-12">
+        <p className="text-lg text-gray-600 mb-10">
           두 분의 가장 특별한 날을 위한 모바일 청첩장을 만들어보세요.
         </p>
-        
-        <div className="bg-white p-8 rounded-lg shadow-lg border text-left">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">제작 문의</h2>
-          <p className="text-gray-600 mb-6">
-            모바일 청첩장 제작을 원하시면, 아래 양식을 복사하여 담당자에게 DM으로 보내주세요.
-          </p>
-          <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto">
-            {formText.trim()}
-          </pre>
-          <button
-            onClick={handleCopy}
-            className="w-full mt-6 bg-pink-500 text-white p-3 rounded-lg font-bold text-lg hover:bg-pink-600 transition-colors"
-          >
-            {copied ? '✅ 복사 완료!' : '양식 복사하기'}
-          </button>
+        <Link 
+          to="/gildonggilsoon" 
+          className="inline-block bg-white text-gray-800 font-bold py-3 px-8 rounded-full shadow-md border border-gray-200 hover:bg-gray-100 transition-transform transform hover:scale-105"
+        >
+          💌 청첩장 샘플 보기
+        </Link>
+      </div>
+
+      {/* ★★★★★ 변경점 2: 상세 이미지 섹션 (마진 제거) ★★★★★ */}
+      <div className="w-full max-w-5xl mx-auto px-0">
+        {/* 이미지들을 담는 컨테이너에서 gap(간격)을 제거합니다. */}
+        <div className="flex flex-col items-center">
+          <img 
+            src="/mainPage1.png" 
+            alt="모바일 청첩장 첫인상 소개" 
+            className="w-full" 
+          />
+          <img 
+            src="/mainPage2.png" 
+            alt="모바일 청첩장 감성 스토리 소개" 
+            className="w-full" 
+          />
+          <img 
+            src="/mainPage3.png" 
+            alt="모바일 청첩장 기능 소개" 
+            className="w-full" 
+          />
+        </div>
+      </div>
+      
+      {/* ★★★★★ 변경점 3: '제작 문의' 섹션을 맨 아래로 이동 ★★★★★ */}
+      <div className="w-full flex flex-col items-center text-center py-16 md:py-20 px-4">
+        <div className="max-w-2xl w-full">
+          <div className="bg-white p-8 rounded-lg shadow-lg border text-left">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">제작 문의</h2>
+            <p className="text-gray-600 mb-6">
+              모바일 청첩장 제작을 원하시면, 아래 양식을 복사하여 담당자에게 DM으로 보내주세요.
+            </p>
+            <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto">
+              {formText.trim()}
+            </pre>
+            <button
+              onClick={handleCopy}
+              className="w-full mt-6 bg-pink-500 text-white p-3 rounded-lg font-bold text-lg hover:bg-pink-600 transition-colors"
+            >
+              {copied ? '✅ 복사 완료!' : '양식 복사하기'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
