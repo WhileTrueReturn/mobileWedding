@@ -6,6 +6,13 @@ import type { InvitationData, Story } from '../types';
 import StoryViewer from './StoryViewer';
 import { messageSets } from '../data/messages';
 
+// ★★★★★ BGM 전역 타입 선언 ★★★★★
+declare global {
+  interface Window {
+    bgmAudio?: HTMLAudioElement;
+  }
+}
+
 // 펜 글씨 로딩 애니메이션 컴포넌트
 const ElegantLoadingScreen: React.FC<{ isFinished: boolean; onAnimationEnd: () => void }> = ({ isFinished, onAnimationEnd }) => {
   const words = ['Wedding', 'Invitation'];
@@ -90,25 +97,29 @@ const InvitationLoader: React.FC = () => {
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [viewerKey, setViewerKey] = useState(0);
   
-  // ★★★★★ BGM 로딩 페이지부터 재생 ★★★★★
+  // ★★★★★ BGM 로딩 페이지부터 재생 (한 번만!) ★★★★★
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // ★★★★★ 컴포넌트 마운트 시 BGM 시작 ★★★★★
+  // ★★★★★ 컴포넌트 마운트 시 BGM 시작 (전역으로 한 번만) ★★★★★
   useEffect(() => {
+    // 이미 재생 중인 BGM이 있는지 확인
+    if (window.bgmAudio) {
+      audioRef.current = window.bgmAudio;
+      return;
+    }
+
     const audio = new Audio('/bgm.mp3');
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
+    window.bgmAudio = audio; // 전역으로 저장
 
     // 로딩 페이지부터 BGM 재생 시도
     audio.play().catch(err => {
       console.log('자동 재생 실패:', err);
     });
 
-    // 컴포넌트 언마운트 시에도 음악은 계속 재생 (StoryViewer로 전달됨)
-    return () => {
-      // 여기서는 정리하지 않음 - StoryViewer에서 관리
-    };
+    // 언마운트 시 정리하지 않음 (계속 재생)
   }, []);
 
   useEffect(() => {

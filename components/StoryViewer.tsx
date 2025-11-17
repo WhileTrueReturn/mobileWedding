@@ -6,6 +6,7 @@ import ProgressBar from './ProgressBar';
 declare global {
   interface Window {
     kakao: any;
+    bgmAudio?: HTMLAudioElement; // ★★★★★ BGM 전역 저장용 ★★★★★
   }
 }
 
@@ -140,31 +141,30 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
   const handleInteractionStart = () => setIsPaused(true);
   const handleInteractionEnd = () => setIsPaused(false);
 
-  // ★★★★★ BGM 초기화 및 자동 재생 (스피커 버튼 없이 무조건 재생) ★★★★★
+  // ★★★★★ BGM 초기화 (이미 재생 중이면 재사용, 없으면 새로 생성) ★★★★★
   useEffect(() => {
+    // 이미 재생 중인 BGM이 있으면 재사용
+    if (window.bgmAudio) {
+      audioRef.current = window.bgmAudio;
+      // 자동 재생 실패했던 경우를 대비해 재생 시도
+      if (audioRef.current.paused) {
+        audioRef.current.play().catch(() => {});
+      }
+      return;
+    }
+
+    // BGM이 없으면 새로 생성 (InvitationLoader를 거치지 않은 경우)
     const audio = new Audio('/bgm.mp3');
-    audio.loop = true; // 반복 재생
-    audio.volume = 0.5; // 볼륨 50%
+    audio.loop = true;
+    audio.volume = 0.5;
     audioRef.current = audio;
+    window.bgmAudio = audio;
 
-    // 자동 재생 시도
-    const playAudio = async () => {
-      try {
-        await audio.play();
-      } catch (error) {
-        console.log('자동 재생 실패, 사용자 인터랙션 필요:', error);
-      }
-    };
+    audio.play().catch(err => {
+      console.log('자동 재생 실패, 사용자 인터랙션 필요:', err);
+    });
 
-    playAudio();
-
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
+    // 컴포넌트 언마운트 시에도 정리하지 않음 (계속 재생)
   }, []);
 
   // ★★★★★ 화면 클릭 시 음악 재생 시도 (자동 재생 실패 시 대비) ★★★★★
