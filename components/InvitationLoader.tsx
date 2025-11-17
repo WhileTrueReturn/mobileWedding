@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -89,6 +89,27 @@ const InvitationLoader: React.FC = () => {
   const [isPreloading, setIsPreloading] = useState(true);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [viewerKey, setViewerKey] = useState(0);
+  
+  // ★★★★★ BGM 로딩 페이지부터 재생 ★★★★★
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // ★★★★★ 컴포넌트 마운트 시 BGM 시작 ★★★★★
+  useEffect(() => {
+    const audio = new Audio('/bgm.mp3');
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+
+    // 로딩 페이지부터 BGM 재생 시도
+    audio.play().catch(err => {
+      console.log('자동 재생 실패:', err);
+    });
+
+    // 컴포넌트 언마운트 시에도 음악은 계속 재생 (StoryViewer로 전달됨)
+    return () => {
+      // 여기서는 정리하지 않음 - StoryViewer에서 관리
+    };
+  }, []);
 
   useEffect(() => {
     if (!invitationId) {
