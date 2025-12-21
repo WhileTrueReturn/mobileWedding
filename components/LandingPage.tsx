@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
+// AdSense 스크립트 실행
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
 
 const LandingPage: React.FC = () => {
   const formText = `
@@ -47,6 +54,17 @@ const LandingPage: React.FC = () => {
 
   const [copied, setCopied] = useState(false);
 
+  // AdSense 광고 로드
+  useEffect(() => {
+    try {
+      if (window.adsbygoogle && window.adsbygoogle.length === 0) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (err) {
+      console.error('AdSense error:', err);
+    }
+  }, []);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(formText.trim()).then(() => {
       setCopied(true);
@@ -88,6 +106,18 @@ const LandingPage: React.FC = () => {
             alt="모바일 청첩장 기능 소개" 
             className="w-full" 
           />
+        </div>
+      </div>
+      
+      {/* Google AdSense - 디스플레이 광고 */}
+      <div className="w-full flex justify-center py-8 bg-gray-100">
+        <div className="max-w-5xl w-full px-4">
+          <ins className="adsbygoogle"
+               style={{ display: 'block' }}
+               data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+               data-ad-slot="YOUR_AD_SLOT_ID"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
         </div>
       </div>
       

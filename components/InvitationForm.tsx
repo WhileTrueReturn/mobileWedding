@@ -5,6 +5,7 @@ import { db, storage } from '../firebase';
 import type { InvitationData, AccountInfo, TransportationInfo, Story } from '../types';
 import { messageSets } from '../data/messages';
 import { v4 as uuidv4 } from 'uuid';
+import imageCompression from 'browser-image-compression';
 import StoryViewer from './StoryViewer';
 
 // TypeScript가 window 객체에 kakao 속성이 있을 수 있음을 인지하도록 합니다.
@@ -151,10 +152,28 @@ const InvitationForm: React.FC = () => {
     const invitationId = `${groomPath}${bridePath}`;
 
     try {
+      // 이미지 압축 옵션 (5MB → 300KB 목표)
+      const compressionOptions = {
+        maxSizeMB: 0.3, // 300KB
+        maxWidthOrHeight: 1920, // 최대 해상도
+        useWebWorker: true,
+        fileType: 'image/jpeg' as const,
+      };
+
+      // 이미지 압축 및 업로드
       const uploadedImageUrls = await Promise.all(
         images.map(async (imageFile) => {
+          // 이미지 압축
+          const compressedFile = await imageCompression(imageFile, compressionOptions);
+          console.log(`압축 완료: ${imageFile.name} - ${(imageFile.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+          
+          // Firebase Storage에 업로드 (Cache-Control 메타데이터 추가)
           const imageRef = ref(storage, `invitations/${invitationId}/${uuidv4()}`);
-          await uploadBytes(imageRef, imageFile);
+          const metadata = {
+            contentType: 'image/jpeg',
+            cacheControl: 'public, max-age=31536000', // 1년 캐싱
+          };
+          await uploadBytes(imageRef, compressedFile, metadata);
           return await getDownloadURL(imageRef);
         })
       );
@@ -251,7 +270,7 @@ const InvitationForm: React.FC = () => {
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
-    const limit = 5 * 1024 * 1024;
+    const limit = 10 * 1024 * 1024; // 10MB로 제한 완화 (어차피 압축할 예정)
 
     if (files.length < 6 || files.length > 10) {
       alert(`사진은 최소 6장, 최대 10장까지 선택할 수 있습니다.\n(현재 ${files.length}장 선택됨)`);
@@ -261,7 +280,7 @@ const InvitationForm: React.FC = () => {
 
     for (const file of files) {
       if (file.size > limit) {
-        alert(`'${file.name}' 파일의 용량이 너무 큽니다. (최대 5MB)`);
+        alert(`'${file.name}' 파일의 용량이 너무 큽니다. (최대 10MB)\n업로드 시 자동으로 압축됩니다.`);
         e.target.value = ''; 
         return;
       }
@@ -462,7 +481,7 @@ const InvitationForm: React.FC = () => {
                     disabled={!hasPreviewed || isUploading}
                     className="w-full bg-green-500 text-white p-3 rounded-lg font-bold text-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed enabled:hover:bg-green-600"
                   >
-                  {isUploading ? '사진 업로드 및 생성 중...' : '청첩장 URL 생성하기'}
+                    {isUploading ? '이미지 압축 및 업로드 중... 잠시만 기다려주세요' : 'URL 생성 및 복사'}
                 </button>
             </div>
           </div>
