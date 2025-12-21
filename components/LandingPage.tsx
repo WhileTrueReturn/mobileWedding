@@ -114,7 +114,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-5xl w-full px-4">
           <ins className="adsbygoogle"
                style={{ display: 'block' }}
-               data-ad-client="ca-pub-6510853175583601"
+               data-ad-client="ca-pub-7718490524225342"
                data-ad-slot="YOUR_AD_SLOT_ID"
                data-ad-format="auto"
                data-full-width-responsive="true"></ins>
