@@ -77,11 +77,12 @@ interface StoryViewerProps {
   invitationData: InvitationData;
   onClose: () => void;
   onRestart: () => void;
+  isPreviewMode?: boolean;
 }
 
 const DURATION = 3000;
 
-const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onClose, onRestart }) => {
+const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onClose, onRestart, isPreviewMode = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -246,6 +247,20 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
             >
               청첩장 다시보기
             </button>
+            <button 
+              onClick={() => {
+                // BGM 정지 및 제거
+                if (window.bgmAudio) {
+                  window.bgmAudio.pause();
+                  window.bgmAudio.currentTime = 0;
+                  window.bgmAudio = undefined;
+                }
+                onClose();
+              }}
+              className="w-full bg-gray-500 text-white p-3 rounded-lg font-bold hover:bg-gray-600 transition-colors"
+            >
+              {isPreviewMode ? '미리보기 닫기' : '모바일청첩장 닫기'}
+            </button>
           </div>
         </div>
       </div>
@@ -274,13 +289,15 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
         <img src={currentStoryOrPage.imageUrl} alt="Story background" className="absolute w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
-        <ProgressBar 
-          count={stories.length} 
-          current={currentIndex} 
-          duration={('duration' in currentStoryOrPage && currentStoryOrPage.duration) || DURATION}
-          isPaused={isPaused}
-          navigationDirection={navigationDirection}
-        />
+        {!('type' in currentStoryOrPage && currentStoryOrPage.type === 'finalPage') && (
+          <ProgressBar 
+            count={stories.length} 
+            current={currentIndex} 
+            duration={('duration' in currentStoryOrPage && currentStoryOrPage.duration) || DURATION}
+            isPaused={isPaused}
+            navigationDirection={navigationDirection}
+          />
+        )}
         
         <div 
           className="absolute top-0 left-0 bottom-0 w-[30%] z-20" 
@@ -295,11 +312,11 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, invitationData, onCl
           onTouchStart={(e) => e.stopPropagation()}
         ></div>
 
-        <div className="absolute inset-0 flex items-end justify-center p-4 pb-20 z-10">
-          <div className="bg-black/30 backdrop-blur-sm px-6 py-4 rounded-xl text-white text-center font-serif text-shadow korean-wrap max-w-full">
+        {'content' in currentStoryOrPage && currentStoryOrPage.content && (
+          <div className="absolute inset-0 flex items-end justify-center p-4 pb-20 z-10 pointer-events-none">
             {currentStoryOrPage.content}
           </div>
-        </div>
+        )}
       </div>
       <style>{`
         .text-shadow { text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.7); }

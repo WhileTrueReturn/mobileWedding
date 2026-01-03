@@ -7,13 +7,19 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "naver:token": "node scripts/naver-commerce.mjs token",
+    "naver:lastChanged": "node scripts/naver-commerce.mjs lastChanged",
+    "naver:query": "node scripts/naver-commerce.mjs query"
   },
   "dependencies": {
+    "@tosspayments/payment-sdk": "^1.9.2",
+    "bcryptjs": "^3.0.3",
     "browser-image-compression": "^2.0.2",
     "firebase": "^12.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5",
     "react-router-dom": "^7.9.5",
     "uuid": "^9.0.1"
   },

@@ -7,6 +7,12 @@ export interface Story {
   duration?: number;
 }
 
+export interface PhotoText {
+  text: string;
+  fontSize: number; // px 단위
+  fontFamily: string; // 폰트 패밀리
+}
+
 // ★★★★★ 변경점: MessageSet의 구조를 완전히 변경합니다. ★★★★★
 export interface MessageSet {
   id: string;
@@ -54,4 +60,7 @@ export interface InvitationData {
   messageSetId: string;
   accounts: AccountInfo[];
   imageUrls: string[];
+  photoTexts: PhotoText[]; // 각 사진(2번째부터)에 대한 텍스트와 폰트 크기
+  promoCode?: string; // 프로모션 코드 (optional)
+  createdAt?: number; // 생성 시간 (timestamp)
 }
