@@ -59,7 +59,7 @@ const InvitationForm: React.FC = () => {
   const [hasPreviewed, setHasPreviewed] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [expirationDays, setExpirationDays] = useState<number>(30); // 기본값 30일
+  const expirationDays = 90; // 고정값 90일
 
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const draggedItem = useRef<number | null>(null);
@@ -851,32 +851,18 @@ const InvitationForm: React.FC = () => {
                   미리보기
                 </button>
 
-                {/* 유효기간 선택 */}
-                <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">
-                    URL 유효기간 선택
-                  </label>
-                  <select
-                    value={expirationDays}
-                    onChange={(e) => setExpirationDays(Number(e.target.value))}
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value={0.002083}>3분 (테스트용)</option>
-                    <option value={30}>30일</option>
-                    <option value={90}>90일</option>
-                    <option value={180}>180일</option>
-                  </select>
-                  <p className="text-xs text-gray-500 mt-2">
-                    선택한 기간이 지나면 URL과 사진이 자동으로 삭제됩니다.
-                  </p>
-                </div>
-
                  <button 
                     type="button" 
-                    onClick={handleRequestCreateUrl}
-                    disabled={!hasPreviewed || isUploading}
+                    onClick={() => {
+                      if (!hasPreviewed) {
+                        alert('미리보기로 1회 이상 확인한 후, 신중하게 생성해주세요.');
+                        return;
+                      }
+                      handleRequestCreateUrl();
+                    }}
+                    disabled={isUploading}
                     className="w-full text-white p-3 rounded-lg font-bold text-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: (!hasPreviewed || isUploading) ? undefined : '#8C7B70' }}
+                    style={{ backgroundColor: isUploading ? undefined : '#8C7B70' }}
                     onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.opacity = '0.9'; }}
                     onMouseLeave={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.opacity = '1'; }}
                   >
