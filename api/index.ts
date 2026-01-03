@@ -21,26 +21,37 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         const filePath = path.resolve('./dist/index.html');
         let htmlData = fs.readFileSync(filePath, 'utf8');
 
-        // URL 경로에서 invitationId를 추출합니다. (예: /gildonggilsoon -> gildonggilsoon)
-        const invitationId = req.url?.split('/')[1].split('?')[0];
+        // URL 경로에서 invitationId를 추출합니다. 
+        // (예: /gildonggilsoon -> gildonggilsoon, /invitation/gildonggilsoon -> gildonggilsoon)
+        const urlParts = req.url?.split('/').filter(part => part && part.trim() !== '');
+        let invitationId = '';
+        
+        // /invitation/xxx 형식인지 확인
+        if (urlParts && urlParts.length > 0) {
+            if (urlParts[0] === 'invitation' && urlParts.length > 1) {
+                invitationId = urlParts[1].split('?')[0];
+            } else {
+                invitationId = urlParts[0].split('?')[0];
+            }
+        }
 
         // 기본값 (메인 페이지용)
-        let title = '감성 인스타 스토리 모바일 청첩장';
-        let description = '사진을 넘길 때마다 펼쳐지는 두 분만의 특별한 이야기. 지금 확인해보세요!';
+        let title = '셀프 모바일 청첩장 당일제작, 인스타 스토리 청첩장';
+        let description = '인스타그램 스토리 형식의 감성적인 모바일 청첩장을 무료로 제작하세요. 사진 업로드만으로 당일 제작 가능한 디지털 청첩장 서비스입니다.';
         let imageUrl = 'https://www.mobilewedding.kr/mainPage0.png';
         let url = 'https://www.mobilewedding.kr';
 
-        // 청첩장 ID가 있고, create 페이지가 아닌 경우
-        if (invitationId && invitationId !== 'create' && invitationId.trim() !== '') {
+        // 청첩장 ID가 있고, create/admin 페이지가 아닌 경우
+        if (invitationId && invitationId !== 'create' && invitationId !== 'admin' && invitationId.trim() !== '') {
             const docRef = doc(db, 'invitations', invitationId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                title = `${data.groomName} ♥ ${data.brideName}의 결혼식에 초대합니다`;
-                description = `${data.weddingDate} ${data.weddingTime}, ${data.weddingLocation}`;
+                title = `${data.groomName} ❤️ ${data.brideName} 결혼합니다`;
+                description = `${data.weddingDate} ${data.weddingTime ? data.weddingTime + ', ' : ''}${data.weddingLocation}${data.weddingHall ? ' ' + data.weddingHall : ''}`;
                 imageUrl = data.imageUrls?.[0] || 'https://www.mobilewedding.kr/mainPage0.png';
-                url = `https://www.mobilewedding.kr/${invitationId}`;
+                url = `https://www.mobilewedding.kr/invitation/${invitationId}`;
             }
         }
 
