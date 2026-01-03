@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from '@vercel/analytics/react';
 import InvitationForm from './components/InvitationForm';
 import LandingPage from './components/LandingPage';
 import InvitationLoader from './components/InvitationLoader';
@@ -26,6 +27,7 @@ function App() {
           */}
           <Route path="/invitation/:invitationId" element={<InvitationLoader />} />
         </Routes>
+        <Analytics />
       </div>
     </HelmetProvider>
   );

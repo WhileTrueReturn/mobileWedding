@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase';
@@ -268,6 +269,15 @@ const InvitationLoader: React.FC = () => {
   const handleRestart = useCallback(() => {
     setViewerKey(prevKey => prevKey + 1);
   }, []);
+
+  // 메타 태그 정보 준비
+  const ogTitle = formData 
+    ? `${formData.groomName} ❤️ ${formData.brideName} 결혼합니다` 
+    : '모바일 청첩장';
+  const ogDescription = formData 
+    ? `${formData.weddingDate} ${formData.weddingLocation}${formData.weddingHall ? ` ${formData.weddingHall}` : ''}`
+    : '모바일 청첩장을 확인하세요';
+  const ogImage = formData?.imageUrls?.[0] || '';
   
   if (error) {
     return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-500">{error}</div>;
@@ -279,22 +289,54 @@ const InvitationLoader: React.FC = () => {
       return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-500">청첩장 정보를 표시할 수 없습니다.</div>;
     }
     return (
-      <StoryViewer 
-        key={viewerKey}
-        stories={stories}
-        invitationData={formData}
-        onClose={handleCloseViewer}
-        onRestart={handleRestart}
-        isPreviewMode={false}
-      />
+      <>
+        <Helmet>
+          <title>{ogTitle}</title>
+          <meta name="description" content={ogDescription} />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={ogTitle} />
+          <meta property="og:description" content={ogDescription} />
+          {ogImage && <meta property="og:image" content={ogImage} />}
+          {ogImage && <meta property="og:image:width" content="1200" />}
+          {ogImage && <meta property="og:image:height" content="630" />}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={ogTitle} />
+          <meta name="twitter:description" content={ogDescription} />
+          {ogImage && <meta name="twitter:image" content={ogImage} />}
+        </Helmet>
+        <StoryViewer 
+          key={viewerKey}
+          stories={stories}
+          invitationData={formData}
+          onClose={handleCloseViewer}
+          onRestart={handleRestart}
+          isPreviewMode={false}
+        />
+      </>
     );
   }
   
   return (
-    <ElegantLoadingScreen
-      isFinished={!loading && !isPreloading}
-      onAnimationEnd={() => setShowStoryViewer(true)}
-    />
+    <>
+      <Helmet>
+        <title>{ogTitle}</title>
+        <meta name="description" content={ogDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        {ogImage && <meta property="og:image:width" content="1200" />}
+        {ogImage && <meta property="og:image:height" content="630" />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+      </Helmet>
+      <ElegantLoadingScreen
+        isFinished={!loading && !isPreloading}
+        onAnimationEnd={() => setShowStoryViewer(true)}
+      />
+    </>
   );
 };
 
