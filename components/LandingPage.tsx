@@ -27,21 +27,26 @@ const LandingPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>무료 모바일 청첩장 제작 | 디지털 청첩장 만들기</title>
-        <meta name="description" content="무료로 모바일 청첩장을 제작하세요. 사진 업로드, 지도 연동, 실시간 수정이 가능한 디지털 청첩장 서비스입니다." />
-        <meta name="keywords" content="모바일청첩장, 청첩장제작, 디지털청첩장, 무료청첩장, 결혼청첩장, 온라인청첩장" />
+        <title>셀프 모바일 청첩장 당일제작, 인스타 스토리 청첩장</title>
+        <meta name="description" content="인스타그램 스토리 형식의 감성적인 모바일 청첩장을 무료로 제작하세요. 사진 업로드만으로 당일 제작 가능한 디지털 청첩장 서비스입니다." />
+        <meta name="keywords" content="모바일청첩장, 청첩장제작, 디지털청첩장, 무료청첩장, 결혼청첩장, 온라인청첩장, 인스타청첩장, 스토리청첩장, 당일제작, 셀프청첩장" />
+        <meta property="og:image" content={`${window.location.origin}/mainPage0.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={`${window.location.origin}/mainPage0.png`} />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
       
       <div className="w-full flex flex-col items-center font-serif" style={{ backgroundColor: '#F8F9FA' }}>
         <div className="w-full text-center py-16 md:py-20 px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-          {isKorean ? '결혼을 축하드립니다' : 'Congratulations on Your Wedding'}
+          {isKorean ? '셀프 모바일 청첩장 당일제작' : 'Same-Day Mobile Wedding Invitation'}
         </h1>
         <p className="text-lg text-gray-600 mb-10">
           {isKorean 
-            ? '두 분의 가장 특별한 날을 위한 모바일 청첩장을 만들어보세요.' 
-            : 'Create a mobile wedding invitation for your special day.'}
+            ? '인스타 스토리 형식의 감성 청첩장을 무료로 만들어보세요' 
+            : 'Create an Instagram story-style wedding invitation for free'}
         </p>
         <div className="flex flex-col gap-4 items-center">
           <Link 
